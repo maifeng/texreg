@@ -1424,6 +1424,12 @@ matrixreg <- function(l,
       mod.names[i] <- paste("Model", i)
     }
   }
+  
+  # reorder coef matrix if reorder.coef is a vector of regular expressions
+  if (is.character(reorder.coef) && length(reorder.coef) > 0) {
+    # Use the reorder_coefficients_regex function if reorder.coef is a vector of regular expressions
+    reorder.coef <- reorder_coefficients_regex(rownames(m.temp), reorder.coef)
+  }
 
   # reorder coef matrix
   m <- reorder(m, reorder.coef)
@@ -4740,3 +4746,52 @@ setMethod(f = "show", signature = "texreg", definition = function(object) {
     cat("No GOF block defined.\n")
   }
 })
+
+#' Reorder coefficient names based on regular expression patterns
+#'
+#' This function reorders the coefficient names of a model based on a specified 
+#' order of regular expression patterns. It prioritizes the patterns according to 
+#' the order in which they are provided.
+#'
+#' @param coef_names A character vector of coefficient names to be reordered.
+#' @param regex_patterns A vector of regular expression patterns that define 
+#'   the desired order of the coefficients. Patterns earlier in the vector have 
+#'   higher priority.
+#' @return A vector of indices that reorder the coefficients in the desired order.
+#' 
+#' @author Feng Mai
+#' @keywords internal
+#' @seealso \code{\link{screenreg}}, \code{\link{texreg}}, \code{\link{htmlreg}}
+#' @examples
+#' \dontrun{
+#'   coef_names <- rownames(m.temp)
+#'   regex_patterns <- c("^log", "^GDP", "^Population")
+#'   ordered_indices <- reorder_coefficients_regex(coef_names, regex_patterns)
+#' }
+reorder_coefficients_regex <- function(coef_names, regex_patterns) {
+  
+  # Initialize an empty vector to store the ordered indices
+  ordered_indices <- c()
+
+  # Initialize a logical vector to track which names have been matched
+  matched <- rep(FALSE, length(coef_names))
+
+  # Loop through each regex pattern and find matching indices
+  for (pattern in regex_patterns) {
+      # Find indices that match the current pattern and have not been matched yet
+      current_indices <- which(grepl(pattern, coef_names) & !matched)
+
+      # Append these indices to the ordered_indices
+      ordered_indices <- c(ordered_indices, current_indices)
+
+      # Mark these indices as matched
+      matched[current_indices] <- TRUE
+  }
+
+  # Add any remaining indices that do not match any pattern
+  remaining_indices <- which(!matched)
+  ordered_indices <- c(ordered_indices, remaining_indices)
+  
+  # Return the ordered indices
+  return(ordered_indices)
+}

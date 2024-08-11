@@ -1428,7 +1428,7 @@ matrixreg <- function(l,
   # reorder coef matrix if reorder.coef is a vector of regular expressions
   if (is.character(reorder.coef) && length(reorder.coef) > 0) {
     # Use the reorder_coefficients_regex function if reorder.coef is a vector of regular expressions
-    reorder.coef <- reorder_coefficients_regex(rownames(m.temp), reorder.coef)
+    reorder.coef <- reorder_coefficients_regex(rownames(m), reorder.coef)
   }
 
   # reorder coef matrix
@@ -4764,7 +4764,7 @@ setMethod(f = "show", signature = "texreg", definition = function(object) {
 #' @seealso \code{\link{screenreg}}, \code{\link{texreg}}, \code{\link{htmlreg}}
 #' @examples
 #' \dontrun{
-#'   coef_names <- rownames(m.temp)
+#'   coef_names <- rownames(m)
 #'   regex_patterns <- c("^log", "^GDP", "^Population")
 #'   ordered_indices <- reorder_coefficients_regex(coef_names, regex_patterns)
 #' }
